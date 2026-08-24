@@ -68,9 +68,7 @@ class SessionStats:
             ValueError: If count is less than 1.
         """
         if count < 1:
-            raise ValueError(
-                f"count must be at least 1, got {count}."
-            )
+            raise ValueError(f"count must be at least 1, got {count}.")
         self._correct += count
 
     def record_incorrect(self, count: int = 1) -> None:
@@ -83,9 +81,7 @@ class SessionStats:
             ValueError: If count is less than 1.
         """
         if count < 1:
-            raise ValueError(
-                f"count must be at least 1, got {count}."
-            )
+            raise ValueError(f"count must be at least 1, got {count}.")
         self._incorrect += count
 
     def record_skipped(self, count: int = 1) -> None:
@@ -98,9 +94,7 @@ class SessionStats:
             ValueError: If count is less than 1.
         """
         if count < 1:
-            raise ValueError(
-                f"count must be at least 1, got {count}."
-            )
+            raise ValueError(f"count must be at least 1, got {count}.")
         self._skipped += count
 
     def reset(self) -> None:

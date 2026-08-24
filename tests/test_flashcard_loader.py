@@ -74,9 +74,7 @@ class TestLoadFlashcards:
         os.unlink(path)
 
     def test_load_wrapped_cards_format(self):
-        path = self._write_json(
-            {"cards": [{"front": "Q1", "back": "A1"}]}
-        )
+        path = self._write_json({"cards": [{"front": "Q1", "back": "A1"}]})
         cards = FileHandler.load_flashcards(path)
         assert len(cards) == 1
         assert cards[0] == Flashcard("Q1", "A1")

@@ -7,8 +7,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Flashcard:
-    """Represents a single flashcard with a front (question) and back (answer).
-    """
+    """Represents a single flashcard with a front (question) and back."""
 
     front: str
     back: str

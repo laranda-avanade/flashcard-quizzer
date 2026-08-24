@@ -14,8 +14,7 @@ from utils.flashcard import Flashcard
 
 
 class QuizMode(ABC):
-    """Abstract base class defining the quiz mode interface (Strategy Pattern).
-    """
+    """Abstract base class for the quiz mode interface (Strategy Pattern)."""
 
     @abstractmethod
     def start(self, cards: List[Flashcard]) -> None:

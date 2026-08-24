@@ -23,7 +23,7 @@ class FileHandler:
         """Save data to a JSON file."""
         filepath = self.data_dir / filename
         try:
-            with open(filepath, 'w', encoding='utf-8') as file:
+            with open(filepath, "w", encoding="utf-8") as file:
                 json.dump(data, file, indent=2, ensure_ascii=False)
         except (IOError, TypeError) as e:
             raise RuntimeError(f"Failed to save data to {filename}: {e}")
@@ -32,7 +32,7 @@ class FileHandler:
         """Load data from a JSON file."""
         filepath = self.data_dir / filename
         try:
-            with open(filepath, 'r', encoding='utf-8') as file:
+            with open(filepath, "r", encoding="utf-8") as file:
                 return json.load(file)
         except FileNotFoundError:
             return {}
@@ -74,17 +74,13 @@ class FileHandler:
         """
         path = Path(filepath)
         if not path.exists():
-            raise FileNotFoundError(
-                f"Flashcard file not found: '{filepath}'"
-            )
+            raise FileNotFoundError(f"Flashcard file not found: '{filepath}'")
 
         try:
             with open(path, "r", encoding="utf-8") as f:
                 raw = json.load(f)
         except json.JSONDecodeError as exc:
-            raise ValueError(
-                f"Malformed JSON in '{filepath}': {exc}"
-            ) from exc
+            raise ValueError(f"Malformed JSON in '{filepath}': {exc}") from exc
 
         if isinstance(raw, list):
             cards_data = raw

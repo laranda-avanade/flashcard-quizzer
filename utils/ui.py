@@ -72,9 +72,7 @@ class QuizSession:
         Returns:
             True if the answers match, False otherwise.
         """
-        return (
-            user_answer.strip().lower() == correct_answer.strip().lower()
-        )
+        return user_answer.strip().lower() == correct_answer.strip().lower()
 
     def _prompt_answer(self, card: Flashcard) -> str:
         """Display the card front and collect a user response.
@@ -96,9 +94,7 @@ class QuizSession:
 
     def _handle_incorrect(self, card: Flashcard) -> None:
         """Display incorrect feedback, show the answer, update stats/mode."""
-        self._print(
-            _red(f"Incorrect. The correct answer is: {card.back}")
-        )
+        self._print(_red(f"Incorrect. The correct answer is: {card.back}"))
         self._stats.record_incorrect()
         self._mode.record_answer(card, correct=False)
 

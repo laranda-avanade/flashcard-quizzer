@@ -26,13 +26,15 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         required=True,
         metavar="FILE",
         help="Path to a JSON flashcard file.",
     )
     parser.add_argument(
-        "-m", "--mode",
+        "-m",
+        "--mode",
         default="sequential",
         metavar="MODE",
         help=(

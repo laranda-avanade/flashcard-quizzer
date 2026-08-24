@@ -1,6 +1,187 @@
-# Design Patterns Guide
+# Design Patterns — Flashcard Quizzer
 
-This guide provides examples of common design patterns that you can implement in your AI-assisted development project. Use these patterns to improve code organization, maintainability, and demonstrate software engineering best practices.
+This document fulfills the Udacity Design Patterns Template requirement.
+It records the two patterns implemented in the Flashcard Quizzer project,
+explains the problem each pattern solves, identifies every class and file
+involved, and justifies the choice of pattern over the alternatives.
+
+---
+
+## Pattern 1: Strategy Pattern
+
+### Pattern Name
+
+Strategy Pattern
+
+### Location in Codebase
+
+| Element | File | Role |
+|---|---|---|
+| `QuizMode` (abstract base) | `utils/quiz_engine.py` | Defines the interface all strategies must satisfy |
+| `SequentialMode` | `utils/quiz_engine.py` | Concrete strategy — presents cards in original order |
+| `RandomMode` | `utils/quiz_engine.py` | Concrete strategy — shuffles cards before presenting |
+| `AdaptiveMode` | `utils/quiz_engine.py` | Concrete strategy — re-queues missed cards for retry |
+| `QuizSession` | `utils/ui.py` | Context class — delegates card ordering to the active strategy |
+| `main.py` | `main.py` | Selects and injects the strategy via `QuizModeFactory` |
+
+### Problem Solved
+
+Before the Strategy pattern was applied, the obvious implementation would
+place all quiz-ordering logic inside a single `run()` function using a chain
+of `if`/`elif` blocks:
+
+```python
+def run(cards, mode):
+    if mode == "sequential":
+        queue = deque(cards)
+    elif mode == "random":
+        shuffled = list(cards)
+        random.shuffle(shuffled)
+        queue = deque(shuffled)
+    elif mode == "adaptive":
+        # ... retry logic interleaved with presentation logic
+```
+
+This approach tightly couples three distinct algorithms into one function.
+Adding a fourth mode (for example, spaced repetition) requires modifying the
+existing function, increasing the risk of regressions, and making each
+algorithm harder to test in isolation.
+
+### Why Strategy Was Chosen
+
+The Strategy pattern separates *what to present next* from *how the session
+runs*. `QuizSession.run()` calls `mode.start()`, `mode.next_card()`, and
+`mode.record_answer()` without knowing which concrete mode it is using. The
+quiz session code never changes when a new mode is added.
+
+This pattern was specifically appropriate here because:
+
+1. The three algorithms share the same interface (`start`, `next_card`,
+   `record_answer`, `is_complete`) but differ completely in their internal
+   state and ordering logic.
+2. The mode is selected at runtime from a CLI argument, which is the canonical
+   use case for Strategy.
+3. Unit tests can exercise each mode independently by constructing the concrete
+   class directly, without needing to parse CLI arguments or run a full session.
+
+### Maintainability Benefits
+
+- **Open/Closed:** Adding a new quiz mode requires only a new subclass of
+  `QuizMode`. No existing code is modified.
+- **Single Responsibility:** Each mode class owns exactly one algorithm and
+  its associated state. `AdaptiveMode` owns the retry queue; `RandomMode`
+  owns the shuffle seed.
+- **Testability:** Each strategy is tested independently in
+  `tests/test_quiz_modes.py` with 27 dedicated test cases covering ordering,
+  retry logic, and termination guarantees.
+
+### How the App Would Look Without This Pattern
+
+Without Strategy, `QuizSession.run()` would contain branching logic for every
+mode, the adaptive retry state (`_deck`, `_retry`, `_current_retry_pass_size`)
+would be mixed into the session object alongside unrelated UI concerns, and
+adding a new mode would require editing the session class. The test file would
+need to drive the entire session to test a single ordering algorithm.
+
+---
+
+## Pattern 2: Factory Pattern
+
+### Pattern Name
+
+Factory Pattern (specifically, a static factory method on a dedicated factory
+class)
+
+### Location in Codebase
+
+| Element | File | Role |
+|---|---|---|
+| `QuizModeFactory` | `utils/quiz_engine.py` | Factory class — maps mode name strings to concrete `QuizMode` classes |
+| `QuizModeFactory.create()` | `utils/quiz_engine.py` | Factory method — instantiates and returns the selected strategy |
+| `main.py` | `main.py` | Caller — passes the CLI `--mode` argument to `QuizModeFactory.create()` |
+
+### Problem Solved
+
+The application receives the quiz mode as a raw string from the command line
+(`"sequential"`, `"random"`, or `"adaptive"`). Without a factory, `main.py`
+would contain its own conditional block to map that string to a class:
+
+```python
+if args.mode == "sequential":
+    mode = SequentialMode()
+elif args.mode == "random":
+    mode = RandomMode()
+elif args.mode == "adaptive":
+    mode = AdaptiveMode()
+else:
+    print("Error: unknown mode", file=sys.stderr)
+    return 1
+```
+
+This duplicates the "known modes" knowledge in the entry point. Any caller
+that wants to create a mode — tests, future integrations, a GUI front end —
+would need to repeat this same block.
+
+### Why Factory Was Chosen
+
+`QuizModeFactory` centralises all object-creation knowledge in one place. The
+internal `_MODES` dictionary maps names to classes and serves as the single
+authoritative registry:
+
+```python
+class QuizModeFactory:
+    _MODES = {
+        "sequential": SequentialMode,
+        "random":     RandomMode,
+        "adaptive":   AdaptiveMode,
+    }
+
+    @staticmethod
+    def create(mode: str) -> QuizMode:
+        key = mode.strip().lower()
+        cls = QuizModeFactory._MODES.get(key)
+        if cls is None:
+            valid = ", ".join(sorted(QuizModeFactory._MODES))
+            raise ValueError(
+                f"Unknown quiz mode '{mode}'. Valid options are: {valid}."
+            )
+        return cls()
+```
+
+This was the right pattern because:
+
+1. Object creation is non-trivial — it must validate input and raise a
+   descriptive error on bad mode names.
+2. `main.py` should not import every concrete strategy class; it only needs
+   `QuizModeFactory`.
+3. Tests for the factory (`test_factory_*` cases in `tests/test_quiz_modes.py`)
+   can verify mode creation and error handling independently of session logic.
+
+### Extensibility Benefits
+
+- **Single point of extension:** Adding a new mode requires only adding one
+  line to `_MODES`. The error message listing valid modes updates automatically.
+- **Decoupling:** `main.py` has zero direct dependencies on `SequentialMode`,
+  `RandomMode`, or `AdaptiveMode`. It imports only `QuizModeFactory`.
+- **Validation in one place:** The "unknown mode" check lives in `create()`.
+  No other part of the codebase needs to guard against invalid mode strings.
+
+### Appropriateness
+
+The Factory pattern is appropriate here rather than, for example, direct
+instantiation or a registry dictionary in `main.py`, because the creation
+logic includes input normalisation (`.strip().lower()`), input validation, and
+descriptive error generation. That logic belongs in a dedicated class, not
+scattered across callers.
+
+---
+
+## Reference Examples from the Starter Template
+
+The sections below preserve the original starter-template examples for
+reference. They are not part of the Flashcard Quizzer implementation.
+
+### Starter Example: Strategy Pattern (Task Sorting)
 
 ## 1. Strategy Pattern
 
