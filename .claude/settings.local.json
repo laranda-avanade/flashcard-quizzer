@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/voc/work/.local/bin/flake8 utils/quiz_engine.py tests/test_quiz_modes.py)",
+      "Bash(/voc/work/.local/bin/pytest tests/test_quiz_modes.py -v --tb=no -q)",
+      "Bash(/voc/work/.local/bin/pytest tests/ -v)",
+      "Bash(/voc/work/.local/bin/flake8 utils/stats.py tests/test_stats.py)",
+      "Bash(python3.10 -c \"import colorama; print(''colorama available'')\")",
+      "Bash(/voc/work/.local/bin/flake8 utils/ui.py tests/test_ui.py)",
+      "Bash(/voc/work/.local/bin/pytest tests/ -v --tb=no -q)",
+      "Bash(/voc/work/.local/bin/flake8 main.py tests/test_main.py)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

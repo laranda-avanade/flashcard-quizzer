@@ -1,0 +1,7 @@
+[
+  {"front": "What is the capital of France?", "back": "Paris"},
+  {"front": "What does CPU stand for?", "back": "Central Processing Unit"},
+  {"front": "What is 2 + 2?", "back": "4"},
+  {"front": "What language is this project written in?", "back": "Python"},
+  {"front": "What design pattern selects an algorithm at runtime?", "back": "Strategy Pattern"}
+]
