@@ -1,5 +1,6 @@
 # Application dependencies
 colorama>=0.4.6  # Cross-platform colored terminal output
+types-colorama>=0.4.15
 
 # Core testing framework
 pytest>=7.0.0

@@ -80,11 +80,7 @@ def main(argv=None) -> int:
     stats = SessionStats()
     session = QuizSession(mode=mode, stats=stats)
 
-    try:
-        session.run(cards)
-    except Exception as exc:
-        print(f"Unexpected error: {exc}", file=sys.stderr)
-        return 1
+    session.run(cards)
 
     if args.stats:
         print(f"\n{stats.summary()}")

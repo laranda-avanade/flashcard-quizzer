@@ -147,7 +147,7 @@ class QuizSession:
                 else:
                     self._handle_incorrect(card)
 
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             self._print("\nQuiz interrupted. Exiting.")
 
         self._print(f"\nSession complete. {self._stats.summary()}")
